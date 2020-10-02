@@ -1,0 +1,62 @@
+name: 'ansible-playbook-with-keyvault'
+description: 'Execute an ansible playbook with credentials held in keyvault' 
+inputs:
+  azure_creds:
+    description: 'If azure login required, the secret containing azure credentials, i.e. output of `az ad sp create-for-rbac`'
+    required: false
+  keyvault_name:
+    description: 'Name of the azure key vault'
+    required: false
+  keyvault_secret_name_ssh_password:
+    description: 'The name of the key vault secret that holds the ssh password'
+    required: false
+  keyvault_secret_name_vault_password:
+    description: 'The name of the key vault secret that holds the ansible vault password'
+    required: false
+  keyvault_secret_name_ssh_privkey: 
+    description: 'The name of the key vault secret that holds the ssh private key'
+    required: false
+  ssh_password_txt_filename:
+    description: 'Optional txt filename to write the ssh password to'
+    required: false
+    default: 'ansible_pass'
+  ssh_privkey_filename:
+    description: 'The filename to write the ssh private key to'
+    required: false
+    default: 'ansible_key'
+  vault_password_filename:
+    description: 'The filename to write the vault password to'
+    default: '.vault.txt'
+  extra_vars_yaml_filename:
+    description: 'The yaml filename to write extra variables to'
+    default: 'extravars.yaml'
+  ansible_dir:
+    description: 'Directory containing ansible code'
+    required: true
+  ansible_playbook:
+    description: 'Location of ansible playbook'
+    required: true
+  ansible_inventory:
+    description: 'Location of ansible inventory'
+    required: false
+  ansible_limit:
+    description: 'Optionally limit to comma separated set of hosts or targets'
+    required: false
+  ansible_user:
+    description: 'The username to use for -u, remote_user, ansible_user options'
+    required: false
+  ansible_vars:
+    description: 'Pipe separated additional variables to pass in as -e option (via yamlfile), e.g. "foo=bar|abc=def"'
+    required: false
+  ansible_args:
+    description: 'Pipe separated ansible args e,g, "--verbose|--check|--foo bar'
+    required: false
+  ansible_config:
+    description: 'Location of ansible config'
+    required: false
+  action_settings:
+    description: 'For debugging the action, e.g. showCliOutput,hideAnsibleOutput,noCleanup,noAnsible'
+    required: false
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

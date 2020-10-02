@@ -1,0 +1,23 @@
+name: build
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-build:
+    name: 'Build and test job'
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checking out repo code'
+      uses: actions/checkout@v2
+
+    - name: 'Validate build'
+      run: |
+        npm install
+        npm run build
+
