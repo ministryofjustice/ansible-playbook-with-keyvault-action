@@ -24,7 +24,7 @@ async function main() {
         let hideAnsibleOutput = false;
 
         // parse inputs
-        core.debug("Parsing inputs");
+        console.log("Parsing inputs");
         errorMessage = "Failed to parse action inputs";
         const azureCredsGithubSecret = core.getInput('azure_creds');
         const keyVaultName = core.getInput("keyvault_name");
@@ -58,13 +58,13 @@ async function main() {
         core.debug(`ActionSettings: hideCliOutput=${hideCliOutput}; hideAnsibleOutput=${hideAnsibleOutput}; doCleanup=${doCleanup}; doAnsible=${doAnsible}`);
 
         // Change directory to ansible repo directory
-        core.debug("Changing to ansible_dir directory");
+        console.log("Changing to ansible_dir directory");
         errorMessage = "Failed to change directory to ansible_dir";
         startingDir = process.cwd();
         process.chdir(ansibleRepoPath);
 
         // Check ansible command exists before we get into the nitty gritty
-        core.debug("Checking ansible-playbook exists");
+        console.log("Checking ansible-playbook installed");
         errorMessage = "Failed to execute ansible-playbook --version, is ansible-playbook installed?";
         const ansiblePlaybookPath = await io.which("ansible-playbook", true);
         await executeCliCommand(ansiblePlaybookPath, "--version", hideCliOutput);
@@ -72,7 +72,7 @@ async function main() {
         // Login to azure if credentials are set
         if (azureCredsGithubSecret) {
             // Parse credentials
-            core.debug("Parsing azure credentials");
+            console.log("Parsing azure credentials");
             errorMessage = "Failed to parse azure credentials";
             const azureCreds = new SecretParser(azureCredsGithubSecret, FormatType.JSON);
             const servicePrincipalId = azureCreds.getSecret("$.clientId", false);
@@ -84,13 +84,13 @@ async function main() {
             }
 
             // Check az command exists
-            core.debug("Checking az command exists");
+            console.log("Checking az command exists");
             errorMessage = "Failed to execute az --version";
             const azPath = await io.which("az", true);
             await executeCliCommand(azPath, "--version", hideCliOutput);
 
             // Attempting Az cli login
-            core.debug("Executing az login");
+            console.log("Executing az login");
             errorMessage = "Failed to az login";
             await executeCliCommand(azPath, `login --service-principal -u "${servicePrincipalId}" -p "${servicePrincipalKey}" --tenant "${tenantId}"`, hideCliOutput);
             errorMessage = "Failed to az account set";
@@ -99,7 +99,7 @@ async function main() {
 
         // Retrieve required secrets from KeyVault
         if (keyVaultSecrets) {
-            core.debug("Retrieving credentials from Azure KeyVault");
+            console.log("Retrieving credentials from Azure KeyVault");
             errorMessage = "Failed to retrieve KeyVault secrets";
             keyVaultParams = new KeyVaultActionParameters().getKeyVaultActionParameters(keyVaultName, keyVaultSecrets);
             const handler = await getHandler();
@@ -112,7 +112,7 @@ async function main() {
 
         // Create temporary txt files containing vault password
         if (vaultPasswordSecretName) {
-            core.debug(`Creating temporary file for vault password`);
+            console.log(`Creating temporary file for vault password`);
             errorMessage = "Failed to create temporary file for vault password";
             const vaultPassword = keyVaultParams.secrets[vaultPasswordSecretName];
             if (!vaultPassword || !vaultPasswordFilename) {
@@ -124,7 +124,7 @@ async function main() {
 
         // Create temporary txt files containing ssh private key
         if (sshPrivateKeySecretName) {
-            core.debug(`Creating temporary file for ssh private key`);
+            console.log(`Creating temporary file for ssh private key`);
             errorMessage = "Failed to create temporary file for ssh private key";
             const sshPrivateKeyBase64 = keyVaultParams.secrets[sshPrivateKeySecretName];
             const sshPrivateKey = Buffer.from(sshPrivateKeyBase64, 'base64').toString();
@@ -137,7 +137,7 @@ async function main() {
 
         // Create temporary txt file containing password (e.g. if sshpass manually configured)
         if (sshPasswordTxtFilename) {
-            core.debug(`Creating temporary text file ssh password`);
+            console.log(`Creating temporary text file ssh password`);
             errorMessage = "Failed to create temporary text file for ssh password";
             const sshPassword = keyVaultParams.secrets[sshPasswordSecretName];
             if (!sshPassword) {
@@ -148,7 +148,7 @@ async function main() {
         }
 
         // Form ansible-playbook commandline
-        core.debug("Setting up ansible options");
+        console.log("Setting up ansible options");
         errorMessage = "Failed to setup ansible options";
         ansibleCmdlineOptions.push(ansiblePlaybook);
         if (ansibleInventory) ansibleCmdlineOptions.push(`-i ${ansibleInventory}`);
@@ -156,6 +156,7 @@ async function main() {
 
         // Add additional yaml for extra-vars
         if (ansibleVars) {
+            console.log("Setting up ansible --extra-vars");
             const extraVarsYaml = [];
             const extraVars = ansibleVars.trim().split("|");
             extraVars.forEach(extraVar => {
@@ -192,6 +193,7 @@ async function main() {
         }
 
         if (ansibleArgs) {
+            console.log("Setting up remaining ansible cmdline arguments");
             const args = ansibleArgs.trim().split("|");
             args.forEach(untrimmedArg => {
                 const arg=untrimmedArg.trim();
@@ -227,16 +229,15 @@ async function main() {
         }
 
         // Run ansible
-        core.debug("Executing ansible-playbook");
+        console.log("Executing ansible-playbook");
         errorMessage = "Failed to execute ansible"; 
-        console.log(ansibleCmdlineOptions.join(" "));
         if (doAnsible) {
             await executeCliCommand(ansiblePlaybookPath, ansibleCmdlineOptions.join(" "), hideAnsibleOutput);
         } else {
             console.log("Not executing: ansible-playbook " + ansibleCmdlineOptions.join(" "));
         }
     } catch (error) {
-        core.debug("Error message: " + error);
+        console.log("Error message: " + error);
         core.setFailed(errorMessage);
     } finally {
         if (doCleanup) cleanup(cleanupFiles, startingDir);
