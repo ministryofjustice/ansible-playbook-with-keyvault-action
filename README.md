@@ -38,8 +38,8 @@ The github "build" pipeline verifies the build.
 | ansible_inventory | Optional.  Location of ansible inventory |
 | ansible_limit | Optional. Limit to comma separated set of hosts or targets |
 | ansible_user | Optional.  Set ansible username |
-| ansible_vars | Optional.  Pipe separated list of additional vars for --extra-vars, e.g. "ansible_user|ansible_password" |
-| ansible_args | Optional.  Pipe separated list of command line args, e.g. "--verbose|--check|-u|-e abc=def"' |
+| ansible_vars | Optional.  Pipe separated list of additional vars for --extra-vars, e.g. 'ansible_user\|ansible_password' |
+| ansible_args | Optional.  Pipe separated list of command line args, e.g. '--verbose\|--check\|-u\|-e abc=def' |
 | ansible_config | Optional.  Location of ansible configuration file |
 | action_settings | Optional.  For debug [showCliOutput,hideAnsibleOutput,noCleanup,noAnsible] |
 
