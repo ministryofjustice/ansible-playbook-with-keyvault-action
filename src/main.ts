@@ -35,7 +35,7 @@ async function main() {
         const sshPrivateKeyFilename = core.getInput("ssh_privkey_filename");
         const vaultPasswordFilename = core.getInput("vault_password_filename");
         const extraVarsYamlFilename = core.getInput("extra_vars_yaml_filename");
-        const ansibleRepoPath = core.getInput("ansible_dir");
+        const ansibleRepoPath = core.getInput("ansible_dir", { required: true});
         const ansiblePlaybook = core.getInput("ansible_playbook", { required: true });
         const ansibleInventory = core.getInput("ansible_inventory");
         const ansibleLimit = core.getInput("ansible_limit");
@@ -51,10 +51,11 @@ async function main() {
         if (sshPrivateKeySecretName) keyVaultSecrets.push(sshPrivateKeySecretName);
 
         // parse actionSettings
-        if (actionSettings.search("showCliOutput") != -1) hideCliOutput = false;
-        if (actionSettings.search("hideAnsibleOutput") != -1) hideAnsibleOutput = true;
-        if (actionSettings.search("noCleanup") != -1) doCleanup = false;
-        if (actionSettings.search("noAnsible") != -1) doAnsible = false;
+        const actionSettingsArray = actionSettings.trim().split("|");
+        if (actionSettingsArray.includes("showCliOutput")) hideCliOutput = false;
+        if (actionSettingsArray.includes("hideAnsibleOutput")) hideAnsibleOutput = true;
+        if (actionSettingsArray.includes("noCleanup")) doCleanup = false;
+        if (actionSettingsArray.includes("noAnsible")) doAnsible = false;
         core.debug(`ActionSettings: hideCliOutput=${hideCliOutput}; hideAnsibleOutput=${hideAnsibleOutput}; doCleanup=${doCleanup}; doAnsible=${doAnsible}`);
 
         // Change directory to ansible repo directory
@@ -136,7 +137,7 @@ async function main() {
         }
 
         // Create temporary txt file containing password (e.g. if sshpass manually configured)
-        if (sshPasswordTxtFilename) {
+        if (sshPasswordSecretName && sshPasswordTxtFilename) {
             console.log(`Creating temporary text file ssh password`);
             errorMessage = "Failed to create temporary text file for ssh password";
             const sshPassword = keyVaultParams.secrets[sshPasswordSecretName];
@@ -174,7 +175,7 @@ async function main() {
                     } else if (extraVar == "ansible_password" || extraVar == "ansible_ssh_pass") {
                         const sshPassword = keyVaultParams.secrets[sshPasswordSecretName];
                         if (!sshPassword) {
-                            throw new Error(`ansible_vars includes ${extraVar}, but ssh password keyvault inputs not specified`);
+                            throw new Error(`ansible_vars includes ${extraVar}, but ssh password keyvault input not specified or empty`);
                         }
                         extraVarsYaml.push(`${extraVar}: '${sshPassword}'`);
                     } else if (extraVar == "vault_password_file") {
