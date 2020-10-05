@@ -1,5 +1,8 @@
 name: 'ansible-playbook-with-keyvault'
-description: 'Execute an ansible playbook with credentials held in keyvault' 
+description: 'Execute an ansible playbook with credentials held in keyvault'
+branding:
+  color: green
+  icon: play
 inputs:
   azure_creds:
     description: 'If azure login required, the secret containing azure credentials, i.e. output of `az ad sp create-for-rbac`'
