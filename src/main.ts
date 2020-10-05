@@ -38,7 +38,6 @@ async function main() {
         const ansibleRepoPath = core.getInput("ansible_dir", { required: true});
         const ansiblePlaybook = core.getInput("ansible_playbook", { required: true });
         const ansibleInventory = core.getInput("ansible_inventory");
-        const ansibleLimit = core.getInput("ansible_limit");
         const ansibleUser = core.getInput("ansible_user");
         const ansibleVars = core.getInput("ansible_vars");
         const ansibleArgs = core.getInput("ansible_args");
@@ -153,7 +152,6 @@ async function main() {
         errorMessage = "Failed to setup ansible options";
         ansibleCmdlineOptions.push(ansiblePlaybook);
         if (ansibleInventory) ansibleCmdlineOptions.push(`-i ${ansibleInventory}`);
-        if (ansibleLimit) ansibleCmdlineOptions.push(`--limit ${ansibleLimit}`);
 
         // Add additional yaml for extra-vars
         if (ansibleVars) {
