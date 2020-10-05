@@ -120,7 +120,7 @@ jobs:
       with:
         ansible_creds: '${{ secrets.AZURE_CREDENTIALS }}'
         keyvault_name: my-keyvault-name
-        keyvault_secret_nane_ssh_password: 'ansible-ssh-password'
+        keyvault_secret_name_ssh_password: 'ansible-ssh-password'
         keyvault_secret_name_vault_password: 'ansible-vault-password'
         keyvault_secret_name_ssh_privkey: 'ansible-ssh-privkey'
         ssh_password_txt_filename: 'ansible_pass'
