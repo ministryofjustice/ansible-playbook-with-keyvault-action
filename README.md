@@ -19,7 +19,7 @@ The github "build" pipeline verifies the build.
 
 ## Usage
 
-Flexible action to allow execution of ansible_playbook with credentials stored in Azure KeyVault.
+Flexible action to allow execution of ansible-playbook with credentials stored in Azure KeyVault.
 
 ### Logging into Azure
 
@@ -82,10 +82,9 @@ Then:
 | ansible_dir | Directory containing ansible code |
 | ansible_playbook | Location of ansible playbook, e.g. site.yml |
 | ansible_inventory | Optional.  Location of ansible inventory |
-| ansible_limit | Optional. Limit to comma separated set of hosts or targets |
 | ansible_user | Optional.  Set ansible username |
 | ansible_vars | Optional.  Pipe separated list of additional vars for --extra-vars, e.g. 'ansible_user\|ansible_password' |
-| ansible_args | Optional.  Pipe separated list of command line args, e.g. '--verbose\|--check\|-u\|-e abc=def' |
+| ansible_args | Optional.  Pipe separated list of command line args, e.g. '--verbose\|--check\|-u\|--limit testserver' |
 | ansible_config | Optional.  Location of ansible configuration file |
 | action_settings | Optional.  Pipe separated list of debug options, e.g. showCliOutput\|hideAnsibleOutput\|noCleanup\|noAnsible |
 
@@ -117,17 +116,21 @@ jobs:
       uses: actions/checkout@2
 
     - name: Run ansible playbook
-      uses: TODO
+      uses: ministryofjustice/ansible-playbook-with-keyvault-action@v1.0
       with:
         ansible_creds: '${{ secrets.AZURE_CREDENTIALS }}'
         keyvault_name: my-keyvault-name
         keyvault_secret_nane_ssh_password: 'ansible-ssh-password'
         keyvault_secret_name_vault_password: 'ansible-vault-password'
         keyvault_secret_name_ssh_privkey: 'ansible-ssh-privkey'
+        ssh_password_txt_filename: 'ansible_pass'
+        ssh_privkey_filename: 'ansible_key'
+        vault_password_filename: '.vault.txt'
+        extra_vars_yaml_filename: 'extra_vars.yaml'
         ansible_dir: ${{ github.workspace }}
         ansible_playbook: sites.yml
         ansible_inventory: inventory.yml
         ansible_user: 'myuser'
-        ansible_args: '--verbose|--check|-u'
-        ansible_vars: 'ansible_password'
+        ansible_args: '--verbose|--check|-u|--limit testserver'
+        ansible_vars: 'ansible_user|ansible_password'
 ```
