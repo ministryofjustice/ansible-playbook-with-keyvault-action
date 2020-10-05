@@ -11,7 +11,7 @@ Typescript code is under src/.  Use npm to compile into javascript + commit resu
 The code for logging into azure and retrieving keyvault secrets is based on the following repos:
 
 - https://github.com/Azure/login
-- https://github.com/Azure/get-keyvault-secret
+- https://github.com/Azure/get-keyvault-secrets
 
 ### Pipelines
 
